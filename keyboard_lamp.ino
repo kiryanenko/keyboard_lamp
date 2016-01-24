@@ -23,9 +23,19 @@ void int_set_mode() {		// прервание: изменение режима работы
 void setup()
 {
 	attachInterrupt(INT_NUM, int_set_mode, RISING); // привязываем прерывание к функции int_set_mode().
-
 }
 
 void loop()
 {
+	if (isRand) {
+
+	} else {
+		unsigned char red   = analogRead(RED_POT_PIN);
+		unsigned char blue  = analogRead(BLUE_POT_PIN);
+		unsigned char green = analogRead(GREEN_POT_PIN);
+		digitalWrite(RED_LED,   red);
+		digitalWrite(BLUE_LED,  blue);
+		digitalWrite(GREEN_LED, green);
+		delay(100);
+	}
 }
