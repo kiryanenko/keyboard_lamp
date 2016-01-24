@@ -30,12 +30,13 @@ void loop()
 	if (isRand) {
 
 	} else {
-		unsigned char red   = analogRead(RED_POT_PIN);
-		unsigned char blue  = analogRead(BLUE_POT_PIN);
-		unsigned char green = analogRead(GREEN_POT_PIN);
-		digitalWrite(RED_LED,   red);
-		digitalWrite(BLUE_LED,  blue);
-		digitalWrite(GREEN_LED, green);
+		setColor(analogRead(RED_POT_PIN) / 4, analogRead(GREEN_POT_PIN) / 4, analogRead(BLUE_POT_PIN) / 4);
 		delay(100);
 	}
+}
+
+void setColor(unsigned char red, unsigned char green, unsigned char blue) {
+	digitalWrite(RED_LED, red);
+	digitalWrite(BLUE_LED, blue);
+	digitalWrite(GREEN_LED, green);
 }
