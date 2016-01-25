@@ -1,32 +1,32 @@
-#define RED_POT_PIN		A7	// пин красного рычага
-#define GREEN_POT_PIN	A6	// пин зеленого рычага
-#define BLUE_POT_PIN	A5	// пин синего рычага
+#define RED_POT_PIN		A7	// РїРёРЅ РєСЂР°СЃРЅРѕРіРѕ СЂС‹С‡Р°РіР°
+#define GREEN_POT_PIN	A6	// РїРёРЅ Р·РµР»РµРЅРѕРіРѕ СЂС‹С‡Р°РіР°
+#define BLUE_POT_PIN	A5	// РїРёРЅ СЃРёРЅРµРіРѕ СЂС‹С‡Р°РіР°
 
-#define RED_LED			6	// пин красных светодиодов
-#define GREEN_LED		2	// пин красных светодиодов
-#define BLUE_LED		4	// пин красных светодиодов
+#define RED_LED			6	// РїРёРЅ РєСЂР°СЃРЅС‹С… СЃРІРµС‚РѕРґРёРѕРґРѕРІ
+#define GREEN_LED		2	// РїРёРЅ РєСЂР°СЃРЅС‹С… СЃРІРµС‚РѕРґРёРѕРґРѕРІ
+#define BLUE_LED		4	// РїРёРЅ РєСЂР°СЃРЅС‹С… СЃРІРµС‚РѕРґРёРѕРґРѕРІ
 
-#define DURATION_PIN	A6	// пин рычага, отвечающий за длительность удерживания цвета
-#define SHADING_PIN		A5	// пин рычага, отвечающий за длительность перехода
+#define DURATION_PIN	A6	// РїРёРЅ СЂС‹С‡Р°РіР°, РѕС‚РІРµС‡Р°СЋС‰РёР№ Р·Р° РґР»РёС‚РµР»СЊРЅРѕСЃС‚СЊ СѓРґРµСЂР¶РёРІР°РЅРёСЏ С†РІРµС‚Р°
+#define SHADING_PIN		A5	// РїРёРЅ СЂС‹С‡Р°РіР°, РѕС‚РІРµС‡Р°СЋС‰РёР№ Р·Р° РґР»РёС‚РµР»СЊРЅРѕСЃС‚СЊ РїРµСЂРµС…РѕРґР°
 
-#define K_DURATION		300	// макс длительность удерживания цвета в сек
-#define K_SHADING		30	// макс длительность перехода в сек
+#define K_DURATION		300	// РјР°РєСЃ РґР»РёС‚РµР»СЊРЅРѕСЃС‚СЊ СѓРґРµСЂР¶РёРІР°РЅРёСЏ С†РІРµС‚Р° РІ СЃРµРє
+#define K_SHADING		30	// РјР°РєСЃ РґР»РёС‚РµР»СЊРЅРѕСЃС‚СЊ РїРµСЂРµС…РѕРґР° РІ СЃРµРє
 
-#define TIME_PARTITION	100	// мин отрезок времени в мс
+#define TIME_PARTITION	100	// РјРёРЅ РѕС‚СЂРµР·РѕРє РІСЂРµРјРµРЅРё РІ РјСЃ
 
-#define INT_NUM			1	// прерывания с номерами 0 (на digital pin 2) и 1 (на digital pin 3)
+#define INT_NUM			1	// РїСЂРµСЂС‹РІР°РЅРёСЏ СЃ РЅРѕРјРµСЂР°РјРё 0 (РЅР° digital pin 2) Рё 1 (РЅР° digital pin 3)
 
-long previousMillis = 0;	// здесь будет храниться время последнего изменения состояния
+long previousMillis = 0;	// Р·РґРµСЃСЊ Р±СѓРґРµС‚ С…СЂР°РЅРёС‚СЊСЃСЏ РІСЂРµРјСЏ РїРѕСЃР»РµРґРЅРµРіРѕ РёР·РјРµРЅРµРЅРёСЏ СЃРѕСЃС‚РѕСЏРЅРёСЏ
 
 struct Color {
 	unsigned char red;
 	unsigned char green;
 	unsigned char blue;
-} current_color;				// предыдущий цвет
+} current_color;				// РїСЂРµРґС‹РґСѓС‰РёР№ С†РІРµС‚
 
-volatile enum {Static, Rand, Rise, Fall} Mode;		// режим работы 
+volatile enum {Static, Rand, Rise, Fall} Mode;		// СЂРµР¶РёРј СЂР°Р±РѕС‚С‹ 
 
-void int_set_mode() {		// прервание: изменение режима работы
+void int_set_mode() {		// РїСЂРµСЂРІР°РЅРёРµ: РёР·РјРµРЅРµРЅРёРµ СЂРµР¶РёРјР° СЂР°Р±РѕС‚С‹
 	switch (Mode) {
 	case Static:
 		Mode = Rand;
@@ -45,7 +45,7 @@ void int_set_mode() {		// прервание: изменение режима работы
 
 void setup()
 {
-	attachInterrupt(INT_NUM, int_set_mode, RISING); // привязываем прерывание к функции int_set_mode().
+	attachInterrupt(INT_NUM, int_set_mode, RISING); // РїСЂРёРІСЏР·С‹РІР°РµРј РїСЂРµСЂС‹РІР°РЅРёРµ Рє С„СѓРЅРєС†РёРё int_set_mode().
 	randomSeed(analogRead(0));
 	Mode = Static;
 }
@@ -88,11 +88,11 @@ void shading(unsigned char red, unsigned char green, unsigned char blue) {
 	unsigned char last_green = current_color.green;
 	float r = last_red, g = last_green, b = last_blue;
 	while ((current_color.red != red || current_color.blue != blue || current_color.green != green) && Mode == Rand) {
-		long time = analogRead(SHADING_PIN) * K_SHADING / TIME_PARTITION;	// длительность перехода / мин отрезок времени
-		// скорости
-		float vr = (red - last_red + 0.0) / time;		// сумарное расстояние
-		float vb = (blue - last_blue + 0.0) / time;		// ------------------- * мин отрезок времени = расстояние проходимое за мин отрезок времени
-		float vg = (green - last_green + 0.0) / time;	//	      время
+		long time = analogRead(SHADING_PIN) * K_SHADING / TIME_PARTITION;	// РґР»РёС‚РµР»СЊРЅРѕСЃС‚СЊ РїРµСЂРµС…РѕРґР° / РјРёРЅ РѕС‚СЂРµР·РѕРє РІСЂРµРјРµРЅРё
+		// СЃРєРѕСЂРѕСЃС‚Рё
+		float vr = (red - last_red + 0.0) / time;		// СЃСѓРјР°СЂРЅРѕРµ СЂР°СЃСЃС‚РѕСЏРЅРёРµ
+		float vb = (blue - last_blue + 0.0) / time;		// ------------------- * РјРёРЅ РѕС‚СЂРµР·РѕРє РІСЂРµРјРµРЅРё = СЂР°СЃСЃС‚РѕСЏРЅРёРµ РїСЂРѕС…РѕРґРёРјРѕРµ Р·Р° РјРёРЅ РѕС‚СЂРµР·РѕРє РІСЂРµРјРµРЅРё
+		float vg = (green - last_green + 0.0) / time;	//	      РІСЂРµРјСЏ
 
 		abs(r - red) < abs(vr) ? r = red : r += vr;
 		abs(b - blue) < abs(vb) ? b = blue : b += vb;
