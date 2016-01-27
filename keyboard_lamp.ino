@@ -2,19 +2,19 @@
 #define GREEN_POT_PIN	A6	// пин зеленого рычага
 #define BLUE_POT_PIN	A5	// пин синего рычага
 
-#define RED_LED			6	// пин красных светодиодов
-#define GREEN_LED		2	// пин красных светодиодов
-#define BLUE_LED		4	// пин красных светодиодов
-
+#define RED_LED			5	// пин красных светодиодов
+#define GREEN_LED		3	// пин красных светодиодов
+#define BLUE_LED		6	// пин красных светодиодов
+// Rand
 #define DURATION_PIN	A6	// пин рычага, отвечающий за длительность удерживания цвета
 #define SHADING_PIN		A5	// пин рычага, отвечающий за длительность перехода
 
 #define K_DURATION		300	// макс длительность удерживания цвета в сек
 #define K_SHADING		30	// макс длительность перехода в сек
-
+// Rising / Fall
 #define TIME_PARTITION	100	// мин отрезок времени в мс
 
-#define INT_NUM			1	// прерывания с номерами 0 (на digital pin 2) и 1 (на digital pin 3)
+#define INT_NUM			0	// прерывания с номерами 0 (на digital pin 2) и 1 (на digital pin 3)
 
 long previousMillis = 0;	// здесь будет храниться время последнего изменения состояния
 
@@ -27,27 +27,27 @@ struct Color {
 volatile enum {Static, Rand, Rise, Fall} Mode;		// режим работы 
 
 void int_set_mode() {		// прервание: изменение режима работы
-	switch (Mode) {
-	case Static:
-		Mode = Rand;
-		break;
-	case Rand:
-		Mode = Rise;
-		break;
-	case Rise:
-		Mode = Fall;
-		break;
-	case Fall:
-		Mode = Static;
-		break;
+	static unsigned long millis_prev;
+	if (millis() - 300 > millis_prev) {
+		switch (Mode) {
+		case Static:	Mode = Rand;	break;
+		case Rand:		Mode = Rise;	break;
+		case Rise:		Mode = Fall;	break;
+		case Fall:		Mode = Static;	break;
+		}
+		Serial.println(Mode);
+		millis_prev = millis();
 	}
 }
 
 void setup()
 {
+	Serial.begin(9600);
 	attachInterrupt(INT_NUM, int_set_mode, RISING); // привязываем прерывание к функции int_set_mode().
-	randomSeed(analogRead(0));
+	randomSeed(analogRead(7));
 	Mode = Static;
+	pinMode(2, INPUT_PULLUP);
+	Serial.println("Hello");
 }
 
 void loop()
@@ -64,19 +64,20 @@ void loop()
 		}
 		delay(TIME_PARTITION);
 		break;
-	case Rise:
-		Mode = Fall;
+/*	case Rise:
+		setColor(analogRead(DURATION_PIN));
+		delay(TIME_PARTITION);
 		break;
 	case Fall:
 		Mode = Static;
-		break;
+		break;*/
 	}
 }
 
 void setColor(unsigned char red, unsigned char green, unsigned char blue) {
-	digitalWrite(RED_LED, red);
-	digitalWrite(BLUE_LED, blue);
-	digitalWrite(GREEN_LED, green);
+	analogWrite(RED_LED, red);
+	analogWrite(BLUE_LED, blue);
+	analogWrite(GREEN_LED, green);
 	current_color.red = red;
 	current_color.blue = blue;
 	current_color.green = green;
