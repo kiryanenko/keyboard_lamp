@@ -63,7 +63,7 @@ void loop()
 		break;
 	case Rand:
 		if (millis() - previousMillis > analogRead(DURATION_PIN) * K_DURATION + 1000) {
-			shading(random(255), random(255), random(255));
+			shading(random(256), random(256), random(256));
 			previousMillis = millis();
 		}
 		break;
@@ -119,7 +119,7 @@ void shading(unsigned char red, unsigned char green, unsigned char blue) {
 }
 
 void vector(float red, float green, float blue) {	// функция увеличивающаю текущий цвет на заданное значение
-	static float r = random(255), g = random(255), b = random(255);
+	static float r = random(256), g = random(256), b = random(256);
 	r += red;
 	g += green;
 	b += blue;
@@ -130,7 +130,7 @@ void vector(float red, float green, float blue) {	// функция увелич
 }
 
 void flicker() {	// функция мерцания
-	static float r = random(255), g = random(255), b = random(255);
+	static float r = random(256), g = random(256), b = random(256);
 	static char vr = 1, vg = 1, vb = 1;
 
 	r += vr * pow(long(analogRead(RED_POT_PIN)) / 1023.0, EXPONENT) * MAX_SPEED * TIME_PARTITION / 1000;
