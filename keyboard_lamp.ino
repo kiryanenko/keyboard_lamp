@@ -87,15 +87,7 @@ void loop()
 		flicker();
 		break;
 	case Shift:
-		if (millis() - previousMillis > long(analogRead(DURATION_PIN)) * K_DURATION + 1000) {
-			char rand = random(3);
-			switch (rand) {
-			case 0: shading(255, 0, 0);	break;
-			case 1: shading(0, 255, 0);	break;
-			case 2: shading(0, 0, 255);	break;
-			}
-			previousMillis = millis();
-		}
+		shift();
 		break;
 	}
 	delay(TIME_PARTITION);
@@ -155,4 +147,19 @@ void flicker() {	// функция мерцания
 	if (b >= 255 || b <= 0) { vb *= -1;	b >= 255 ? b = 255 : b = 0; }
 	
 	setColor(r, g, b);
+}
+
+void shift() {
+	static char rand = random(3);
+	if (millis() - previousMillis > long(analogRead(DURATION_PIN)) * K_DURATION + 1000) {
+		char r = random(3);
+		while (r != random(3)) { r = random(3); }
+		rand = r;
+		switch (rand) {
+		case 0: shading(255, 0, 0);	break;
+		case 1: shading(0, 255, 0);	break;
+		case 2: shading(0, 0, 255);	break;
+		}
+		previousMillis = millis();
+	}
 }
