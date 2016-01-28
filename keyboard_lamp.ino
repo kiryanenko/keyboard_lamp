@@ -9,12 +9,12 @@
 #define TIME_PARTITION	50	// мин отрезок времени в мс
 
 #define INT_NUM			0	// прерывания с номерами 0 (на digital pin 2) и 1 (на digital pin 3)
-// Rand режим рандомных цветов:
+// Rand / Shift режим рандомных цветов / режим смены цвета:
 #define DURATION_PIN	A6	// пин рычага, отвечающий за длительность удерживания цвета
 #define SHADING_PIN		A5	// пин рычага, отвечающий за длительность перехода
 
-#define K_DURATION		300	// макс длительность удерживания цвета в сек
-#define K_SHADING		30	// макс длительность перехода в сек
+#define K_DURATION		100	// макс длительность удерживания цвета в сек
+#define K_SHADING		5	// макс длительность перехода в сек
 // Rising / Fall / Vector / Flicker режимы возрастания / убывания / по середине рычага 0 / мерцание:
 #define MAX_SPEED		256 // макс скорость изменения цвета в цвет / сек
 #define EXPONENT		17	// степень для рычагов
@@ -27,7 +27,7 @@ struct Color {
 	unsigned char blue;
 } current_color;				// предыдущий цвет
 
-volatile enum { Static, Rand, Rise, Fall, Vector, Flicker} Mode;		// режим работы 
+volatile enum { Static, Rand, Rise, Fall, Vector, Flicker, Shift } Mode;		// режим работы 
 
 void int_set_mode() {		// прервание: изменение режима работы
 	static unsigned long millis_prev;
@@ -38,7 +38,8 @@ void int_set_mode() {		// прервание: изменение режима р
 		case Rise:		Mode = Fall;	break;
 		case Fall:		Mode = Vector;	break;
 		case Vector:	Mode = Flicker;	break;
-		case Flicker:	Mode = Static;	break;
+		case Flicker:	Mode = Shift;	break;
+		case Shift:		Mode = Static;	break;
 		}
 		Serial.println(Mode);
 		millis_prev = millis();
@@ -62,7 +63,7 @@ void loop()
 		setColor(analogRead(RED_POT_PIN) / 4, analogRead(GREEN_POT_PIN) / 4, analogRead(BLUE_POT_PIN) / 4);
 		break;
 	case Rand:
-		if (millis() - previousMillis > analogRead(DURATION_PIN) * K_DURATION + 1000) {
+		if (millis() - previousMillis > long(analogRead(DURATION_PIN)) * K_DURATION + 1000) {
 			shading(random(256), random(256), random(256));
 			previousMillis = millis();
 		}
@@ -85,6 +86,17 @@ void loop()
 	case Flicker:
 		flicker();
 		break;
+	case Shift:
+		if (millis() - previousMillis > long(analogRead(DURATION_PIN)) * K_DURATION + 1000) {
+			char rand = random(3);
+			switch (rand) {
+			case 0: shading(255, 0, 0);	break;
+			case 1: shading(0, 255, 0);	break;
+			case 2: shading(0, 0, 255);	break;
+			}
+			previousMillis = millis();
+		}
+		break;
 	}
 	delay(TIME_PARTITION);
 }
@@ -103,8 +115,9 @@ void shading(unsigned char red, unsigned char green, unsigned char blue) {
 	unsigned char last_blue = current_color.blue;
 	unsigned char last_green = current_color.green;
 	float r = last_red, g = last_green, b = last_blue;
-	while ((current_color.red != red || current_color.blue != blue || current_color.green != green) && Mode == Rand) {
-		long time = analogRead(SHADING_PIN) * K_SHADING / TIME_PARTITION;	// длительность перехода / мин отрезок времени
+	while ((current_color.red != red || current_color.blue != blue || current_color.green != green) 
+		&& (Mode == Rand || Mode == Shift)) {
+		float time = long(analogRead(SHADING_PIN) + 1) * K_SHADING / TIME_PARTITION;	// длительность перехода / мин отрезок времени
 		// скорости
 		float vr = (red - last_red + 0.0) / time;		// сумарное расстояние
 		float vb = (blue - last_blue + 0.0) / time;		// ------------------- * мин отрезок времени = расстояние проходимое за мин отрезок времени
