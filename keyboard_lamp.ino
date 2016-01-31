@@ -9,6 +9,8 @@
 #define TIME_PARTITION	50	// мин отрезок времени в мс
 
 #define INT_NUM			0	// прерывания с номерами 0 (на digital pin 2) и 1 (на digital pin 3)
+
+#define ADDRESS			0	// адресс хранения MODE в EEPROM
 // Rand / Shift режим рандомных цветов / режим смены цвета:
 #define DURATION_PIN	A6	// пин рычага, отвечающий за длительность удерживания цвета
 #define SHADING_PIN		A5	// пин рычага, отвечающий за длительность перехода
@@ -19,6 +21,8 @@
 #define MAX_SPEED		256 // макс скорость изменения цвета в цвет / сек
 #define EXPONENT		17	// степень для рычагов
 
+#include <EEPROMEx\EEPROMex.h>
+
 long previousMillis = 0;	// здесь будет храниться время последнего изменения состояния
 
 struct Color {
@@ -27,7 +31,7 @@ struct Color {
 	unsigned char blue;
 } current_color;				// предыдущий цвет
 
-volatile enum { Static, Rand, Rise, Fall, Vector, Flicker, Shift } Mode;		// режим работы 
+volatile enum mode { Static, Rand, Rise, Fall, Vector, Flicker, Shift } Mode;		// режим работы 
 
 void int_set_mode() {		// прервание: изменение режима работы
 	static unsigned long millis_prev;
@@ -42,6 +46,7 @@ void int_set_mode() {		// прервание: изменение режима р
 		case Shift:		Mode = Static;	break;
 		}
 		Serial.println(Mode);
+		EEPROM.writeBlock(ADDRESS, Mode);
 		millis_prev = millis();
 	}
 }
@@ -51,14 +56,24 @@ void setup()
 	Serial.begin(9600);
 	attachInterrupt(INT_NUM, int_set_mode, RISING); // привязываем прерывание к функции int_set_mode().
 	randomSeed(analogRead(7));
-	Mode = Static;
-	pinMode(2, INPUT_PULLUP);
+	EEPROM.readBlock(ADDRESS, Mode);
+	pinMode(INT_NUM ? 3 : 2, INPUT_PULLUP);
+	pinMode(RED_POT_PIN, INPUT);
+	pinMode(BLUE_POT_PIN, INPUT);
+	pinMode(GREEN_POT_PIN, INPUT);
+	pinMode(RED_LED, OUTPUT);
+	pinMode(BLUE_LED, OUTPUT);
+	pinMode(GREEN_LED, OUTPUT);
 	Serial.println("Hello");
 }
 
 void loop()
 {
 	switch (Mode) {
+	default: 
+		Serial.print("ERROR! MODE: "); Serial.println(Mode);
+		Mode = Static;
+		EEPROM.writeBlock(ADDRESS, Mode);
 	case Static:
 		setColor(analogRead(RED_POT_PIN) / 4, analogRead(GREEN_POT_PIN) / 4, analogRead(BLUE_POT_PIN) / 4);
 		break;
